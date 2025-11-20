@@ -4,10 +4,44 @@ import plotly.express as px
 import folium
 from streamlit_folium import st_folium
 
-# load data
-@st.cache_data
+@st.cache_data(show_spinner="Mengunduh data dari Google Drive...")
 def load_data():
-    return pd.read_csv("main_data.csv")
+    try:
+        # File ID dari link Google Drive
+        file_id = "1TwVNlif_zHnvAimlAwwjrFf4C3MsmtrG"
+        
+        # Direct download link Google Drive
+        url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        
+        # Coba download file
+        response = requests.get(url)
+        
+        # Jika Google Drive memberikan halaman konfirmasi (file besar)
+        if "html" in response.headers.get("Content-Type", ""):
+            # Cari token konfirmasi
+            import re
+            match = re.search(r"confirm=([0-9A-Za-z_]+)", response.text)
+            if match:
+                confirm_token = match.group(1)
+                url = f"https://drive.google.com/uc?export=download&id={file_id}&confirm={confirm_token}"
+                response = requests.get(url)
+        
+        # Jika gagal
+        if response.status_code != 200:
+            st.error("❌ Gagal mengunduh file dari Google Drive. Pastikan link dapat diakses publik.")
+            return None
+        
+        # Convert ke CSV buffer
+        csv_data = StringIO(response.text)
+        
+        # Load ke dataframe
+        df = pd.read_csv(csv_data)
+        
+        return df
+
+    except Exception as e:
+        st.error(f"❌ Terjadi error saat memuat data: {e}")
+        return None
 
 df = load_data()
 
@@ -192,3 +226,4 @@ folium.Choropleth(
 ).add_to(m)
 
 st_folium(m, width=700, height=450)
+
