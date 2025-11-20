@@ -122,7 +122,7 @@ fig3 = px.line(
 st.plotly_chart(fig3, use_container_width=True)
 
 # —–– Kota pelanggan
-st.header("3️⃣ Analisis Kota: Pelanggan vs Transaksi")
+st.header("Analisis Kota: Pelanggan vs Transaksi")
 top_customers = df_filtered["customer_city"].value_counts().head(10)
 top_transactions = df_filtered["customer_city"].value_counts().head(10)
 
@@ -168,4 +168,5 @@ folium.Choropleth(
     legend_name="Rata-rata Waktu Pengiriman (hari)",
 ).add_to(m)
 st_folium(m, width=700, height=450)
+
 
